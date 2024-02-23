@@ -1,0 +1,6 @@
+migrations/
+db.sqlite3
+media_root/
+pycache
+filetree.py
+__pycache__/
