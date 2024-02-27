@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1l2!2=ok(-_&=@!ayo((a4uestute-%hn21g43m7vb5l&k864k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = ['ibraparts.ma', '192.168.1.4', 'www.ibraparts.ma', '154.144.253.5', 'localhost', 'ibraparts.ddns.net', 'http://ibraparts.ddns.net']
+ALLOWED_HOSTS = ['167.99.39.116', 'ibraparts.com', 'www.ibraparts.com', 'localhost']
 
 CSRF_TRUSTED_ORIGINS=['http://ibraparts.ddns.net', 'https://ibraparts.ma']
 CORS_ALLOWED_ORIGINS = [
@@ -94,7 +94,7 @@ else:
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'myproject',
         'USER': 'myprojectuser',
-        'PASSWORD': os.envireon.get("POSTGRES_PASSWORD"),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
         'HOST': 'localhost',
         'PORT': '',
     }
