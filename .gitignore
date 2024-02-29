@@ -4,3 +4,5 @@ media_root/
 pycache
 filetree.py
 __pycache__/
+*.log
+*.txt

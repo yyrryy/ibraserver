@@ -205,7 +205,8 @@ def isadmin(user):
 # Create your views here.
 def home(request):
     ctx={
-        'promotion':Promotion.objects.order_by('info')
+        'promotion':Promotion.objects.order_by('info'),
+        'titel':'Accueil'
     }
     # print(request.user)
     # print(request.user.groups.first())
