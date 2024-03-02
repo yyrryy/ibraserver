@@ -4017,9 +4017,11 @@ def notifyadmin(request):
     oldnotif=Ordersnotif.objects.filter(isread=True)
     oldnotif.delete()
     newnotif=Ordersnotif.objects.filter(isread=False)
-    return JsonResponse({
+    response= JsonResponse({
         "length": newnotif.count(),
     })
+    response['Access-Control-Allow-Origin'] = 'http://ibraparts.ddns.net'
+    return response
 
 def disablenotif(request):
     newnotif=Ordersnotif.objects.filter(isread=False)
@@ -4081,10 +4083,12 @@ def getconnectedusers(request):
         """
     print('connected', connected)
     print('notconnected', notconnected)
-    return JsonResponse({
+    response= JsonResponse({
         'length':length,
         'trs':trs
     })
+    response['Access-Control-Allow-Origin'] = 'http://ibraparts.ddns.net'
+    return response
 
 
 def payreglbl(request):

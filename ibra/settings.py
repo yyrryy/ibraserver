@@ -104,7 +104,6 @@ if DEBUG:
         }
     }
 else:
-    ALLOWED_HOSTS = ['167.99.39.116', 'ibraparts.com', 'www.ibraparts.com', 'localhost']
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
