@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-1l2!2=ok(-_&=@!ayo((a4uestute-%hn21g43m7vb5l&k864k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 print('>>>>>>>>', DEBUG)
-ALLOWED_HOSTS = ['167.99.39.116', 'ibraparts.com', 'www.ibraparts.com', 'localhost']
-
+ALLOWED_HOSTS = ['167.99.39.116', 'ibraparts.ma', 'www.ibraparts.ma', 'localhost']
+CORS_ALLOW_ALL_ORIGINS = ['ibraparts.ddns.net']
 # Application definition
 
 INSTALLED_APPS = [
