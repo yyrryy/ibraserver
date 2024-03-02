@@ -621,7 +621,6 @@ def catalogpage(request):
         has_promotion=Exists(Produit.objects.filter(mark_id=OuterRef('pk'), isoffer=True)),
         total_products=Count('produit')
     )
-    print(Category.objects.order_by('code').first().name)
     ctx={
             'categories': categories,
             'firstctg':Category.objects.order_by('code').first(),
