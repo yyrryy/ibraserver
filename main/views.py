@@ -366,16 +366,17 @@ def updatepassword(request):
 @user_passes_test(tocatalog, login_url='main:loginpage')
 @login_required(login_url='main:loginpage')
 def commande(request):
+    import requests as req
     # clientname=request.POST.get('clientname')
     # clientaddress=request.POST.get('clientaddress')
     # clientphone=request.POST.get('clientphone')
-
     cart=Cart.objects.filter(user=request.user).first()
     if cart:
         cartitems=Cartitems.objects.filter(cart=cart)
         notesorder=request.POST.get('notesorder')
         cmndfromclient=request.POST.get('cmndfromclient')
         if cmndfromclient == 'true':
+            res=req.get('http://ibraparts.ddns.net/commandfromserver', {'cartsitems':cartitems, 'clientid':client.id, 'total':cart.total, 'notesorder':notesorder, 'cmndfromclient':cmndfromclient})
             client=Client.objects.get(user_id=request.user.id)
             order=Order.objects.create(client=client, salseman=client.represent,  modpymnt='--', modlvrsn='--',total=cart.total, isclientcommnd=True, note=notesorder)
         else:
