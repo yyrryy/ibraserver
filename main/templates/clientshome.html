@@ -16,7 +16,7 @@
 	<div class="col-2 mb-2 p-2">
 		<input type="text" class="repinput form-control" style="border-radius: 3em;height: 40px;" placeholder="Recherche REPEXPERT" onchange="searchrepexpert()">
 	
-	<img src="/media/repxpert.svg" class="btn text-white mt-2" onclick="searchrepexpert()" style="width: 19em">
+	<img src="/media/repxpert.svg" class="btn text-white mt-2" onclick="searchrepexpert()" style="width: 14em">
 	</div>
 
 	<div class="col-2 mb-2 p-2 me-5 text-center">
@@ -108,27 +108,27 @@
 				</div>-->
 				<div id="container">
 					<div class="card">
-						<div class="card-header">
+						<div class="">
 							NOUVEAU ARRIVAGE
 						</div>
-						<div class="card-body">
+						<div class="">
 							<div class="owl-carousel">
 								{% for i in newproducts %}
-								<div class="card rounded bg-white" style="border: 3px solid;">
+								<div class="card rounded bg-white d-flex flex-column" style="border: 3px solid; height: 27em;">
 									<a href="/product/{{i.id}}" class="d-flex flex-column border p-2">
-										<img src="{{i.image.url}}" alt="" class="rounded" />
+										<img src="{% if i.image%} {{i.image.url}} {% endif %}" alt="" class="rounded" />
 									</a>
 								  <div class="p-2">
 								  	<div class="d-flex justify-content-between mb-2">
 								  		
 								    <strong class="text-darkblue">{{i.ref.upper}}</strong>
-								    <img src='{{i.mark.image.url}}' style="width: 70px">
+								    <img src='{% if i.mark.image%} {{i.mark.image.url}} {% endif %}' style="width: 70px">
 								  	</div>
-								    <p class="card-text text-darkblue" style="white-space: nowrap;">{{i.category.name}}</p>
+								    <strong class="card-text text-darkblue">{{i.name}}</strong>
 								    <!-- <strong class="text-darkblue">{{i.sellprice}} ({% if i.remise > 0 %}{{i.remise}}{%else%}NET{%endif%})</strong> -->
 
-								    <a href="/product/{{i.id}}" class="btn btn-primary w-100">Nouveau</a>
-								  </div>
+								</div>
+									<a href="/product/{{i.id}}" class="btn btn-primary w-100 mt-auto">Nouveau</a>
 								</div>
 								
 								{% endfor %}
@@ -139,11 +139,11 @@
 					
 					<!-- Each image is 350px by 233px -->
 					<div class="card">
-						<div class="card-header">
+						<div class="">
 							promotions
 						</div>
-						<div class="card-body">
-							<div class="owl-carousel mt-5">
+						<div class="">
+							<div class="owl-carousel">
 								{% for i in promotions %}
 								<img src="{{i.image.url}}" alt="" />
 								{% endfor %}

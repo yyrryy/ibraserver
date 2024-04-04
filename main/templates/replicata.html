@@ -4,8 +4,13 @@
 
 
 {% block content %}
+<div class="alert mb-3 mt-3 text-center" style="background: orange;">
+  <strong style="font-size: 32px">
+    Reliquats
+  </strong>
+</div>
 <div class="block">
-    <div class="">
+    <div class="container">
       <div class="cart">
         
         <div class="cart__table cart-table position-relative" style="height: 80vh; overflow: scroll;">
@@ -14,7 +19,7 @@
         </div>
         
           <table class="table table-bordered table-responsive">
-            <thead style="position: sticky;top: 0; background: #80808052;">
+            <thead style="position: sticky;top: 0;background: #80808052;">
               <tr class="">
                 <th style="width: 11%">Image</th>
                 <th class="" style="width: 50%;">Article</th>
@@ -50,8 +55,33 @@
 <script src="{% static 'js/catalog.js'%}"></script>
 <script src="{% static 'js/cart.js'%}"></script>
 <script>
-  function updatecartitem(event, cartitemid, productid, cartid){
-    $.get('/updatecartitem', {'cartitemid':cartitemid, qty:$(event.target).val(), productid:productid, cartid:cartid}, (data)=>{
+    function cancelreliquat(event, id){
+  alertify.confirm('Supprimer?', function(){
+    $.get('/removeitemfromwish', {'productid':id}, (data)=>{
+      $('.whishedlist').html(parseInt($('.whishedlist').html())-1)
+    })
+    $(event.target).parent().parent().remove();
+    //updatetotal()
+    // remove from local storage
+    //products=JSON.parse(localStorage.getItem('products'))
+    // using splice
+    //let dx=products.indexOf(id)
+    //console.log(dx)
+    //products.splice(dx, 1)
+    //localStorage.setItem('products', JSON.stringify(products))
+    // remove from local storage
+    //productsdetails=JSON.parse(localStorage.getItem('productsdetails'))
+    //productsdetails.splice(dx, 1)
+    //localStorage.setItem('productsdetails', JSON.stringify(productsdetails))
+    //$('.whishedlist').text(products.length)
+    // check if cart is empty
+    //if (products.length==0){
+    //    $('.valider').prop('disabled', true)
+    //}
+  })
+}
+  function updatewishitem(event, cartitemid, productid, cartid){
+    $.get('/updatewishitem', {'cartitemid':cartitemid, qty:$(event.target).val(), productid:productid, cartid:cartid}, (data)=>{
         location.reload()
     })
   }
@@ -68,7 +98,7 @@
 
 
     $('.loadingcartitems').addClass('d-none')
-      $.get('/getitemsincart', 
+      $.get('/getitemsinwishlist', 
         {
           'userid': "{{request.user.id}}"
         }, 
@@ -89,15 +119,15 @@
             </td>
             <td>${i.remise}%</td>
             <td class=" qtyholder" data-title="Quantity">
-              <input value="${i.qty}" onchange="updatecartitem(event, ${i.cartitemid}, ${i.id}, ${i.cartid})">
+              <input value="${i.qty}" onchange="updatewishitem(event, ${i.wichitemid}, ${i.id}, ${i.wichid})">
               
             </td>
-            
             <td>
-              <button class="btn btn-danger" onclick="cancelproduct(event, ${i.id})">
+              <button class="btn btn-danger" onclick="cancelreliquat(event, ${i.id})">
                 X
               </button>
             </td>
+            
             <td><div class="status ${i.status}"></div></td>
             </tr>
             `)

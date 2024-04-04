@@ -10,7 +10,7 @@ def allproducts():
 
 @register.simple_tag
 def allcategories():
-    return Category.objects.all()
+    return Category.objects.all().order_by('code')
 
 
 

@@ -1,7 +1,7 @@
 
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
-from .models import Category, Client, Order, Orderitem, Produit, Client, Mark, Represent, Bonlivraison, Ordersnotif, Connectedusers, Promotion, Refstats, Cart, Cartitems, Notavailable
+from .models import Category, Client, Order, Orderitem, Produit, Client, Mark, Represent, Bonlivraison, Ordersnotif, Connectedusers, Promotion, Refstats, Cart, Cartitems, Notavailable, Wishlist, Wich, Notification
 # import pandas as pd
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
@@ -60,7 +60,7 @@ def searchrefphone(request):
               <div class="suggestions__product-image image image--type--product">
                 <div class="image__body">
                   
-                    <img class="image__tag" src="{i.image.url if i.image else i.mark.image.url}" alt="">
+                    <img class="image__tag" src="{i.image.url if i.image else ""}" alt="">
                  
                 </div>
               
@@ -83,7 +83,8 @@ def searchrefphone(request):
                     0.00
                   </div>
                   <div>
-                  <img src="{i.mark.image.url if i.mark.image else ''}" width=80>
+                  <img src="{i.mark.image.url if i.mark else ''}" width=80>
+                  
                   </div>
                   <div class="d-flex flex-column mt-auto" style="width: 8vw;">
 
@@ -104,7 +105,13 @@ def searchrefphone(request):
         return JsonResponse({'data':a})
 
     #products = Produit.objects.filter(Q(ref__icontains=ref) | Q(name__icontains=ref) | Q(cars__icontains=ref) | Q(coderef__icontains=ref) | Q(equivalent__icontains=ref) | Q(refeq1__icontains=ref) | Q(refeq2__icontains=ref) | Q(refeq3__icontains=ref) | Q(refeq4__icontains=ref) | Q(diametre__icontains=ref))
-    
+    brands = [product.mark for product in products if product.mark]
+    categories = [product.category for product in products if product.category]
+
+    unique_categories = set(categories)
+    unique_brands = set(brands)
+    brands = [{'id': mark.id, 'name': mark.name, 'image':mark.image.url if mark.image else '/media/default.png'} for mark in unique_brands]
+    categories = [{'id': category.id, 'name': category.name, 'image':category.image.url if category.image else '/media/default.png'} for category in unique_categories]
     for i in products:
         if i.stocktotal<=0:
             status="indisponible"
@@ -112,52 +119,99 @@ def searchrefphone(request):
             status="disponible"
         else:
             status="soon"
-        a+=f"""
-        <div class="suggestions__item suggestions__product border mb-2">
-          <div class="suggestions__product-image image image--type--product">
-            <div class="image__body">
-              <a href='/product/{i.id}' terget='_blank'>
-                <img class="image__tag" src="{i.image.url if i.image else i.mark.image.url}" alt="">
-              </a>
-            </div>
-          
-          </div>
-          <div class="suggestions__product-info">
-            <div class="suggestions__product-name">
-              <strong class="text-blue">{i.ref.upper()}</strong> <br>
-              <strong style="color:red;">{i.refeq1.upper() if i.refeq1 else ''}</strong> <br>
-              <strong style="color:blue;">{i.refeq2.upper() if i.refeq2 else ''}</strong> <br>
-              <strong style="color:blue;">{i.diametre if i.refeq2 else ''}</strong> <br>
-              <strong style="color:red; font-size:20px;">{i.refeq3.upper() if i.refeq3 else ''}</strong>
-            </div>
-            <div class="suggestions__product-name"> {i.name} </div>
-            <div class="d-flex">
-                <div class="status {status}"></div>
-              
-              
-            </div>
-          
-          </div>
-            <div class="d-flex flex-column">
-
-              <div class="suggestions__product-price text-orange"> 
-                {i.sellprice} {i.remise if i.remise > 0 else ("NET")}% 
-              </div>
-              <div>
-              <img src="{i.mark.image.url if i.mark.image else ''}" width=80>
-              </div>
-              <div class="d-flex flex-column mt-auto" style="width: 8vw;">
-
-                <div class="cart-table__quantity input-number">
-                  <input style="height: 2.5em;" class="form-control input-number__input qty" type="number" min="1" value="1">
+        if request.user.groups.first().name=='clients':
+            a+=f"""
+                <div class="suggestions__item suggestions__product border mb-2 productsbrand{i.mark.id if i.mark else ''} productscategorycat{i.category.id if i.category else ''}">
+                <div class="suggestions__product-image image image--type--product">
+                    <div class="image__body">
+                    <a href='/product/{i.id}' terget='_blank'>
+                        <img class="image__tag" src="{i.image.url if i.image else ""}" alt="">
+                    </a>
+                    </div>
+                
                 </div>
-                <button class="btn btn-primary cmnd" pdct="{i.id}" pdctref="{i.ref}" pdctname="{i.name}" pdctpr="{i.sellprice}" pdctid="{i.id}" pdctimg="{ i.image.url if i.image else '' }" pdctremise="{i.remise}" pdctcategory="" onclick="cmnd(event)">Cmnd</button>
-                <button class="btn btn-info mt-2 d-none anullercmnd" data-id="{i.id}" onclick="anullercmnd(event, '{i.id}')"> Anuller </button>
-              </div>
-            </div>
-        </div>
-        """
-    return JsonResponse({'data':a})
+                <div class="suggestions__product-info">
+                    <div class="suggestions__product-name">
+                    <strong class="text-blue">{i.ref.upper()}</strong> <br>
+                    <strong style="color:red;">{i.refeq1.upper() if i.refeq1 else ''}</strong> <br>
+                    <strong style="color:blue;">{i.refeq2.upper() if i.refeq2 else ''}</strong> <br>
+                    <strong style="color:blue;">{i.diametre if i.diametre else ''}</strong> <br>
+                    <strong style="color:red; font-size:20px;">{i.refeq3.upper() if i.refeq3 else ''}</strong>
+                    </div>
+                    <div class="suggestions__product-name"> {i.name} </div>
+                    <div class="d-flex">
+                        <div class="status {status}"></div>
+                    
+                    
+                    </div>
+                
+                </div>
+                    <div class="d-flex flex-column">
+
+                    <div class="suggestions__product-price text-orange"> 
+                        {i.sellprice} {i.remise if i.remise > 0 else ("NET")}% 
+                    </div>
+                    <div>
+                    <img src="{i.mark.image.url if i.mark and i.mark.image else ''}" width=80>
+                    </div>
+                    <div class="d-flex flex-column mt-auto" style="width: 8vw;">
+
+                        <div class="cart-table__quantity input-number">
+                        <input style="height: 2.5em;" class="form-control input-number__input qty" type="number" min="1" value="1">
+                        </div>
+                        <button class="btn btn-{'success'if i.stocktotal <= 0 else 'primary'} cmnd" pdct="{i.id}" pdctref="{i.ref}" pdctname="{i.name}" pdctpr="{i.sellprice}" pdctid="{i.id}" pdctimg="{ i.image.url if i.image else '' }" pdctremise="{i.remise}" pdctcategory="" onclick="{'whishlist(event)'if i.stocktotal <= 0 else 'cmnd(event)'}">{'Rliquat'if i.stocktotal <= 0 else 'Cmnd'}</button>
+                        <button class="btn btn-info mt-2 d-none anullercmnd" data-id="{i.id}" onclick="anullercmnd(event, '{i.id}')"> Anuller </button>
+                    </div>
+                    </div>
+                </div>
+            """
+        else:
+            a+=f"""
+                <div class="suggestions__item suggestions__product border mb-2 productsbrand{i.mark.id if i.mark else ''} productscategorycat{i.category.id if i.category else ''}">
+                <div class="suggestions__product-image image image--type--product">
+                    <div class="image__body">
+                    <a href='/product/{i.id}' terget='_blank'>
+                        <img class="image__tag" src="{i.image.url if i.image else ""}" alt="">
+                    </a>
+                    </div>
+                
+                </div>
+                <div class="suggestions__product-info">
+                    <div class="suggestions__product-name">
+                    <strong class="text-blue">{i.ref.upper()}</strong> <br>
+                    <strong style="color:red;">{i.refeq1.upper() if i.refeq1 else ''}</strong> <br>
+                    <strong style="color:blue;">{i.refeq2.upper() if i.refeq2 else ''}</strong> <br>
+                    <strong style="color:blue;">{i.diametre if i.refeq2 else ''}</strong> <br>
+                    <strong style="color:red; font-size:20px;">{i.refeq3.upper() if i.refeq3 else ''}</strong>
+                    </div>
+                    <div class="suggestions__product-name"> {i.name} </div>
+                    <div class="d-flex">
+                        <div class="status {status}"></div>
+                    
+                    
+                    </div>
+                
+                </div>
+                    <div class="d-flex flex-column">
+
+                    <div class="suggestions__product-price text-orange"> 
+                        {i.sellprice} {i.remise if i.remise > 0 else ("NET")}% 
+                    </div>
+                    <div>
+                    <img src="{i.mark.image.url if i.mark and i.mark.image else ''}" width=80>
+                    </div>
+                    <div class="d-flex flex-column mt-auto" style="width: 8vw;">
+
+                        <div class="cart-table__quantity input-number">
+                        <input style="height: 2.5em;" class="form-control input-number__input qty" type="number" min="1" value="1">
+                        </div>
+                        <button class="btn btn-primary cmnd" pdct="{i.id}" pdctref="{i.ref}" pdctname="{i.name}" pdctpr="{i.sellprice}" pdctid="{i.id}" pdctimg="{ i.image.url if i.image else '/media/default.png' }" pdctremise="{i.remise}" pdctcategory="" onclick="cmnd(event)">Cmnd</button>
+                        <button class="btn btn-info mt-2 d-none anullercmnd" data-id="{i.id}" onclick="anullercmnd(event, '{i.id}')"> Anuller </button>
+                    </div>
+                    </div>
+                </div>
+            """
+    return JsonResponse({'data':a, 'brands':brands, 'categories':categories})
 
 @user_passes_test(tocatalog, login_url='main:loginpage')
 @login_required(login_url='main:loginpage')
@@ -176,7 +230,7 @@ def clientshome(request):
         'clients':Client.objects.all(),
         'title':'Catalog',
         'marques':marks,
-        
+        'title':'interface',
         'promotions':Promotion.objects.order_by('info'),
         'newproducts':Produit.objects.filter(isnew=True).order_by('category')
     }
@@ -366,6 +420,7 @@ def updatepassword(request):
 @user_passes_test(tocatalog, login_url='main:loginpage')
 @login_required(login_url='main:loginpage')
 def commande(request):
+    client=Client.objects.get(pk=request.POST.get('client'))
     import requests as req
     # clientname=request.POST.get('clientname')
     # clientaddress=request.POST.get('clientaddress')
@@ -373,22 +428,54 @@ def commande(request):
     cart=Cart.objects.filter(user=request.user).first()
     if cart:
         cartitems=Cartitems.objects.filter(cart=cart)
+        itemstoserver=[]
+        totalofdispounible=0
+        totalofnotdispounible=0
+        for i in cartitems:
+            if request.user.groups.first().name=='clients':
+                if i.product.stocktotal>0:
+                    totalofdispounible+=i.total
+                    item={
+                        'ref':i.product.ref,
+                        'name':i.product.name,
+                        'qty':i.qty,
+                        'price':i.product.sellprice,
+                        'total':i.total,
+                        'remise':i.product.remise,
+                        'productid':i.product.id,
+                    }
+                    itemstoserver.append(item)
+                    i.delete()
+                else:
+                    totalofnotdispounible+=i.total
+            else:
+                totalofdispounible+=i.total
+                item={
+                    'ref':i.product.ref,
+                    'name':i.product.name,
+                    'qty':i.qty,
+                    'price':i.product.sellprice,
+                    'total':i.total,
+                    'remise':i.product.remise,
+                    'productid':i.product.id,
+                }
+                itemstoserver.append(item)
+                i.delete()
         notesorder=request.POST.get('notesorder')
         cmndfromclient=request.POST.get('cmndfromclient')
         if cmndfromclient == 'true':
-            res=req.get('http://ibraparts.ddns.net/commandfromserver', {'cartsitems':cartitems, 'clientid':client.id, 'total':cart.total, 'notesorder':notesorder, 'cmndfromclient':cmndfromclient})
-            client=Client.objects.get(user_id=request.user.id)
-            order=Order.objects.create(client=client, salseman=client.represent,  modpymnt='--', modlvrsn='--',total=cart.total, isclientcommnd=True, note=notesorder)
+            order=Order.objects.create(client=client, salseman=client.represent,  modpymnt='--', modlvrsn='--',total=totalofdispounible, isclientcommnd=True, note=notesorder)
+            req.get('http://ibraparts.ddns.net/commandfromserver', {'items':json.dumps(itemstoserver), 'clientcode':client.code, 'total':totalofdispounible, 'notesorder':notesorder, 'cmndfromclient':cmndfromclient, 'userid':request.user.id})
         else:
-            rep=Represent.objects.get(user_id=request.user.id)
-            order=Order.objects.create(client_id=request.POST.get('client'), salseman=rep,  modpymnt='--', modlvrsn='--',total=cart.total, note=notesorder)
+            rep=Represent.objects.get(user_id=request.user.id).id
+            order=Order.objects.create(client_id=request.POST.get('client'), salseman_id=rep,  modpymnt='--', modlvrsn='--',total=totalofdispounible, note=notesorder)
+            req.get('http://ibraparts.ddns.net/commandfromserver', {'items':json.dumps(itemstoserver), 'clientcode':client.code, 'total':totalofdispounible, 'notesorder':notesorder, 'cmndfromclient':cmndfromclient, 'userid':request.user.id, 'rep':rep})
+        cart.total=totalofnotdispounible
+        cart.save()
         Ordersnotif.objects.create(user_id=request.user.id)
 
         # totalremise=request.POST.get('totalremise', 0)
-        for i in cartitems:
-                Orderitem.objects.create(order=order, ref=i.product.ref, name=i.product.name, qty=int(i.qty), product=i.product, remise=i.product.remise, price=i.product.sellprice, total=i.total)
-        # return a json res
-        cart.delete()
+        
     # send_mail(message='Nouveau commande.', subject=f'Nouveau commande. #{order.id}')
     #threading.Thread(target=send_mail, args=('Nouveau commande.', f'Nouveau commande. #{order.id}', 'abdelwahedaitali@gmail.com', ['aitaliabdelwahed@gmail.com'], False)).start()
         return JsonResponse({
@@ -512,7 +599,7 @@ def productscategories(request, id):
     result = [nested_products[i:i+2] for i in range(0, len(nested_products), 2)]
     
     group=request.user.groups.first().name
-    if group=='salsemen' and request.user.represent.slides:
+    if group=='salsemen':
         if c.affichage=='double':
             print('>>>>>>>>><<double')
             products=[products[i:i+8] for i in range(0, len(products), 8)]
@@ -852,19 +939,234 @@ def getitemsincart(request):
         items=Cartitems.objects.filter(cart=cart)
         length=len(items)
         for i in items:
+            if i.product.stocktotal<=0:
+                status="indisponible"
+            elif i.product.stocktotal>=5:
+                status="disponible"
+            else:
+                status="soon"
             itemscart.append({
+                'cartid':cart.id,
+                'cartitemid':i.id,
                 'ref':i.product.ref,
                 'name':i.product.name,
                 'remise':i.product.remise,
                 'image':i.product.image.url if i.product.image else '',
                 'sellprice':i.product.sellprice,
                 'qty':i.qty,
-                'id':i.product.id
+                'id':i.product.id,
+                'status':status
             })
-        print(itemscart)
+    except:
+        pass
+    response= JsonResponse({
+        'length':length,
+        'items':itemscart
+    })
+    response['Access-Control-Allow-Origin'] = 'http://ibraparts.ddns.net'
+    return response
+
+def updateproduct(request):
+    id=request.GET.get('id')
+    product=Produit.objects.get(pk=id)
+    product.stocktotal=request.GET.get('stocktotal')
+    product.save()
+    return JsonResponse({
+        'success':True
+    })
+
+def addtowhishlist(request):
+    # use try except cause the cart may noto be created
+    productid=request.GET.get('productid')
+    qty=request.GET.get('qty')
+    print('>>>>>>>>>', productid, qty)
+    product=Produit.objects.get(pk=productid)
+    total=round(int(qty)*product.prixnet, 2)
+    try:
+        cart=Wich.objects.get(user=request.user)
+        # check if product alrady exist
+        exist=Wishlist.objects.filter(wich=cart, product=product)
+        if exist:
+            print('>>>>>>> item already')
+            return JsonResponse({
+                'success':False,
+                'message':'Produit commandé deja'
+            })
+        else:
+            # if not update total and create item in the same cart
+            cart.total=round(cart.total+total, 2)
+            Wishlist.objects.create(wich=cart, product=product, qty=qty, total=total)
+            cart.save()
+    except Exception as e:
+        print('Exception, in addtocart', e)
+        cart=Wich.objects.create(user=request.user, total=total)
+        Wishlist.objects.create(wich=cart, product=product, qty=qty, total=total)
+    return JsonResponse({
+        'success':True
+        })
+
+def updatecartitem(request):
+    qty=request.GET.get('qty')
+    productid=request.GET.get('productid')
+    cartid=request.GET.get('cartid')
+    cartitemid=request.GET.get('cartitemid')
+    cart=Cart.objects.get(pk=cartid)
+    product=Produit.objects.get(pk=productid)
+    item=Cartitems.objects.get(pk=cartitemid)
+    cart.total=round(float(cart.total)-float(item.total), 2)
+    item.qty=qty
+    total=round(float(product.prixnet)*float(qty), 2)
+    cart.total=cart.total+total
+    item.total=total
+    item.save()
+    cart.save()
+    return JsonResponse({
+        'success':True
+    })
+
+def updatewishitem(request):
+    qty=request.GET.get('qty')
+    productid=request.GET.get('productid')
+    cartid=request.GET.get('cartid')
+    cartitemid=request.GET.get('cartitemid')
+    cart=Wich.objects.get(pk=cartid)
+    product=Produit.objects.get(pk=productid)
+    item=Wishlist.objects.get(pk=cartitemid)
+    cart.total=round(float(cart.total)-float(item.total), 2)
+    item.qty=qty
+    total=round(float(product.prixnet)*float(qty), 2)
+    cart.total=cart.total+total
+    item.total=total
+    item.save()
+    cart.save()
+    return JsonResponse({
+        'success':True
+    })
+
+
+def getitemsinwishlist(request):
+    length=0
+    itemswich=[]
+    userid=request.GET.get('userid')
+    print('>>>>>', userid)
+    try:
+        wich=Wich.objects.get(user_id=userid)
+        print('>>>>', wich)
+        items=Wishlist.objects.filter(wich=wich)
+        length=len(items)
+        for i in items:
+            if i.product.stocktotal<=0:
+                status="indisponible"
+            elif i.product.stocktotal>=5:
+                status="disponible"
+            else:
+                status="soon"
+            itemswich.append({
+                'wichid':wich.id,
+                'wichitemid':i.id,
+                'ref':i.product.ref,
+                'name':i.product.name,
+                'remise':i.product.remise,
+                'image':i.product.image.url if i.product.image else '',
+                'sellprice':i.product.sellprice,
+                'qty':i.qty,
+                'id':i.product.id,
+                'status':status
+            })
+        print('>>>>>>>>> itemswich', itemswich, length)
     except:
         pass
     return JsonResponse({
         'length':length,
-        'items':itemscart
+        'items':itemswich
     })
+
+def removeitemfromwish(request):
+    print('>>>>>>> remove from wish')
+    productid=request.GET.get('productid')
+    
+
+    product=Produit.objects.get(pk=productid)
+    cart=Wich.objects.get(user=request.user)
+    itemtoremove=Wishlist.objects.get(wich=cart, product=product)
+
+    cart.total=round(cart.total-itemtoremove.total, 2)
+    cart.save()
+    itemtoremove.delete()
+    return JsonResponse({
+        'success':True
+    })
+
+def switchtocart(request):
+    try:
+        wich=Wich.objects.get(user=request.user)
+        wichitems=Wishlist.objects.filter(wich=wich)
+        cart=Cart.objects.filter(user=request.user).first()
+        for i in wichitems:
+            if i.product.stocktotal > 0:
+                print('product in stock', i.product.ref, i.total)
+                if cart:
+                    Cartitems.objects.create(cart=cart, product=i.product, qty=i.qty, total=i.total)
+                    cart.total=round(cart.total+i.total)
+                    cart.save()
+                else:
+                    cart=Cart.objects.create(user=request.user, total=i.total)
+                    Cartitems.objects.create(cart=cart, product=i.product, qty=i.qty, total=i.total)
+                    
+                i.delete()
+        return JsonResponse({
+            'success':True
+        })
+    except Exception as e:
+        print('>>error in switch to cart', e)
+        return JsonResponse({
+            'success':True
+        })
+
+@user_passes_test(tocatalog, login_url='main:loginpage')
+def replicata(request):
+    return render(request, 'replicata.html', {'title':'Reliquat'})
+
+def notifications(request):
+    notifications=Notification.objects.all()
+    return JsonResponse({
+        'notifications':list(notifications.values()),
+        'length':notifications.count()
+    })
+def catalogpermission(request):
+    password=request.GET.get('password')
+    if password and password=='0000':
+        firstctgid=Category.objects.order_by('code').first().id
+        return JsonResponse({
+            'success':True,
+            'url':f'/categories/products/{firstctgid}'
+        })
+    else:
+        return JsonResponse({
+            'success':False,
+            'error':'Mot de passe incorrect'
+        })
+
+def newarrivage(request):
+    products=Produit.objects.filter(isnew=True).order_by('-stocktotal')
+    ctx={
+        'products':products, 
+        'title':'Produits de nouvau arrivage', 
+        'arrivage':True
+    }
+    return render(request, 'products.html', ctx)
+
+def allproducts(request):
+    products=Produit.objects.all().order_by('category__code').order_by('code')
+    nested_products = [[products[i], products[i+1]] for i in range(0, len(products)-1, 2)]
+
+    # Create a final list by grouping pairs into sublists
+    result = [nested_products[i:i+2] for i in range(0, len(nested_products), 2)]
+    
+    group=request.user.groups.first().name
+    if group=='salsemen':
+        products=[products[i:i+4] for i in range(0, len(products), 4)]
+    ctx={
+        'products':products
+    }
+    return render(request, 'products.html', ctx)

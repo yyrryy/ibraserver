@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from main.models import Produit, Mark, Category, Supplier, Stockin, Itemsbysupplier, Client, Represent, Order, Orderitem, Clientprices, Bonlivraison, Facture, Outfacture, Livraisonitem, PaymentClientbl, PaymentClientfc,  PaymentSupplier, Bonsregle, Returnedsupplier, Avoirclient, Returned, Avoirsupplier, Orderitem, Carlogos, Ordersnotif, Connectedusers, Promotion, UserSession, Refstats, Notavailable, Cart
+from main.models import Produit, Mark, Category, Supplier, Stockin, Itemsbysupplier, Client, Represent, Order, Orderitem, Clientprices, Bonlivraison, Facture, Outfacture, Livraisonitem, PaymentClientbl, PaymentClientfc,  PaymentSupplier, Bonsregle, Returnedsupplier, Avoirclient, Returned, Avoirsupplier, Orderitem, Carlogos, Ordersnotif, Connectedusers, Promotion, UserSession, Refstats, Notavailable, Cart, Wishlist, Wich, Notification
 from django.contrib.auth import logout
 from django.http import JsonResponse, HttpResponse
 import openpyxl
@@ -70,99 +70,91 @@ def categoriespage(request):
     return render(request, 'categories.html', ctx)
 
 def createcategory(request):
-    name=request.POST.get('categoryname')
-    code=request.POST.get('categorycode')
-    affichage=request.POST.get('categoryaffichage')
-    hideclient=request.POST.get('hideclient')=='True'
-    commercialexcluded=request.POST.getlist('commercialexcluded')
+    print('>>>>>>>> creating category')
+    name=request.GET.get('name')
+    code=request.GET.get('code')
+    affichage=request.GET.get('affichage')
+    hideclient=request.GET.get('hideclient')=='True'
+    commercialexcluded=request.GET.getlist('commercialexcluded')
     reps=Represent.objects.filter(pk__in=commercialexcluded)
+    print(len(commercialexcluded)>0)
 
     # get image file
-    image=request.FILES.get('categoryimage')
+    image=request.GET.get('image')
     # create category
     category=Category.objects.create(name=name, image=image, code=code, affichage=affichage, masqueclients=hideclient)
-    if len(commercialexcluded) > 0:
+    if len(commercialexcluded)>0:
+        print('getting reps', commercialexcluded, reps)
         category.excludedrep.set(reps)
-    ctx={
-        'categories':Category.objects.all().order_by('code'),
-        'title':'Categories'
-    }
-    return JsonResponse({
-        'html':render(request, 'categories.html', ctx).content.decode('utf-8')
-    })
-
-def updatecategory(request):
-    print(request.POST.get('updatecategoryaffichage'))
-    image=request.FILES.get('updatecategoryimage') or None
-    id=request.POST.get('id')
-    hideclient=request.POST.get('hideclient')=='True'
-    print('>>>>>>>in updtae',request.POST.get('hideclient'))
-    commercialexcluded=request.POST.getlist('commercialexcluded')
-    reps=Represent.objects.filter(pk__in=commercialexcluded)
-    category=Category.objects.get(pk=id)
-    category.masqueclients=hideclient
-    category.excludedrep.set(reps)
-    category.name=request.POST.get('updatecategoryname')
-    category.code=request.POST.get('updatecategorycode')
-    category.affichage=request.POST.get('updatecategoryaffichage')
-    if image:
-        category.image=image
-    category.save()
-    ctx={
-        'categories':Category.objects.all().order_by('code'),
-        'title':'Categories'
-    }
-    return JsonResponse({
-        'html':render(request, 'categories.html', ctx).content.decode('utf-8')
-    })
-
-
-def marquespage(request):
-    ctx={
-        'marques':Mark.objects.all(),
-        'title':'List des marques',
-        'commercials':Represent.objects.all()
-    }
-    return render(request, 'marques.html', ctx)
-
-def createmarque(request):
-    name=request.POST.get('marquename')
-    # get image file
-    image=request.FILES.get('marqueimage')
-    # create category
-    hideclient=request.POST.get('hideclientmrk')=='True'
-    commercialexcluded=request.POST.getlist('commercialexcludedmrk')
-    reps=Represent.objects.filter(pk__in=commercialexcluded)
-
-    mrq=Mark.objects.create(name=name, image=image, masqueclients=hideclient)
-    if len(commercialexcluded) > 0:
-        mrq.excludedrep.set(reps)
-
+    
     return JsonResponse({
         'success':True
     })
 
-def updatemarque(request):
-    image=request.FILES.get('image') or None
-    id=request.POST.get('id')
-    hideclient=request.POST.get('hideclientmrk')=='True'
-    commercialexcluded=request.POST.getlist('commercialexcludedmrk')
+def updatecategory(request):
+    
+    id=request.GET.get('id')
+    hideclient=request.GET.get('hideclient')
+    commercialexcluded=request.GET.getlist('commercialexcluded')
     reps=Represent.objects.filter(pk__in=commercialexcluded)
-
-    mark=Mark.objects.get(pk=id)
-    mark.name=request.POST.get('name')
-    mark.masqueclients=hideclient
-    mark.excludedrep.set(reps)
-    if image:
-        mark.image=image
-    mark.save()
-    ctx={
-        'marques':Mark.objects.all(),
-        'title':'List des marques'
-    }
+    category=Category.objects.get(pk=id)
+    category.masqueclients=hideclient
+    category.excludedrep.clear()
+    category.excludedrep.set(reps)
+    category.name=request.GET.get('name')
+    category.affichage=request.GET.get('affichage')
+    category.code=request.GET.get('code')
+    category.image=request.GET.get('image')
+    
+    category.save()
     return JsonResponse({
-        'html':render(request, 'marques.html', ctx).content.decode('utf-8')
+        'success':True
     })
+
+
+
+def createmarque(request):
+    try:
+        name=request.GET.get('name')
+        # get image file
+        image=request.GET.get('image')
+        # create category
+        hideclient=request.GET.get('hideclient')
+        commercialexcluded=request.GET.getlist('commercialexcluded')
+        reps=Represent.objects.filter(pk__in=commercialexcluded)
+        print(hideclient, commercialexcluded, reps)
+        mrq=Mark.objects.create(name=name, image=image, masqueclients=hideclient)
+        mrq.excludedrep.set(reps)
+
+        return JsonResponse({
+            'success':True
+        })
+    except Exception as e:
+        print(">>>>>error", e)
+
+def updatemarque(request):
+
+    id=request.GET.get('id')
+    print('>>>>>> updating mark', id)
+    try:
+        image=request.GET.get('image')
+        hideclient=request.GET.get('hideclient')
+        commercialexcluded=request.GET.getlist('commercialexcluded')
+        reps=Represent.objects.filter(pk__in=commercialexcluded)
+
+        mark=Mark.objects.get(pk=id)
+        mark.name=request.GET.get('name')
+        mark.masqueclients=hideclient
+        mark.excludedrep.clear()
+        mark.excludedrep.set(reps)
+        mark.image=image
+        mark.save()
+        
+        return JsonResponse({
+            'success':True
+        })
+    except Exception as e:
+        print(">>>>", e)
 
 def checkref(request):
     ref=request.POST.get('ref').lower().strip()
@@ -189,23 +181,6 @@ def supplierspage(request):
         'title':'List des fournisseurs'
     }
     return render(request, 'suppliers.html', ctx)
-
-def addsupplier(request):
-    name=request.POST.get('suppnameinp')
-    phone=request.POST.get('suppphone')
-    address=request.POST.get('address')
-    Supplier.objects.create(
-        name=name,
-        phone=phone,
-        address=address
-    )
-    ctx={
-        'suppliers':Supplier.objects.all(),
-        'title':'List des fournisseurs'
-    }
-    return JsonResponse({
-        'html':render(request, 'suppliers.html', ctx).content.decode('utf-8')
-    })
 
 def getsupplierdata(request):
     id=request.POST.get('id')
@@ -238,28 +213,28 @@ def updatesupplier(request):
 
 def addoneproduct(request):
     try:
-
-        ref=request.POST.get('ref').lower().strip()
-        name=request.POST.get('name').strip()
-        category=request.POST.get('category')
-        commercialsprix=request.POST.get('commercialsprix') or "[]"
-        mark=request.POST.get('marque') or None
-        logo=request.POST.get('logo', None)
-        image=request.FILES.get('image')
-        sellprice=request.POST.get('sellprice') or 0
-        supplier=request.POST.get('supplier') or None
-        minstock=request.POST.get('minstock') or 0
-        buyprice=request.POST.get('buyprice') or 0
-        remise=request.POST.get('remise') or 0
-        diametre=request.POST.get('diametre') or ''
-        representprice=request.POST.get('repprice') or None
-        code=request.POST.get('code') or ''
-        block=request.POST.get('block') or ''
-        equivalent=request.POST.get('equiv') or ''
-        cars=request.POST.getlist('cars') or ''
-        print('>>>>>>>', logo)
+        ref=request.GET.get('ref').lower().strip()
+        name=request.GET.get('name').strip()
+        category=request.GET.get('category')
+        commercialsprix=request.GET.get('commercialsprix') or "[]"
+        mark=request.GET.get('mark') or None
+        logo=request.GET.get('logo', None)
+        image=request.GET.get('image')
+        sellprice=request.GET.get('sellprice') or 0
+        supplier=request.GET.get('supplier') or None
+        minstock=request.GET.get('minstock') or 0
+        buyprice=request.GET.get('buyprice') or 0
+        remise=request.GET.get('remise') or 0
+        diametre=request.GET.get('diametre') or ''
+        representprice=request.GET.get('repprice') or None
+        code=request.GET.get('code') or '00'
+        block=request.GET.get('block') or ''
+        equivalent=request.GET.get('equiv') or ''
+        cars=request.GET.getlist('cars') or ''
+        print('>>>>>>>', image)
         netprice=round(float(sellprice)-(float(sellprice)*float(remise)/100), 2)
         # create product
+        print('>>>>>>>>>>>>>>>creating product')
         Produit.objects.create(
             ref=ref,
             name=name,
@@ -281,19 +256,13 @@ def addoneproduct(request):
             block=block,
             carlogos_id=logo,
             stocktotal=0,
-            stockfacture=0
+            stockfacture=0,
+            isactive=False
         )
 
-        categories=Category.objects.all()
-        marques=Mark.objects.all()
-        ctx={'categories':categories,
-         'marques':marques,
-         'commercials':Represent.objects.all(),
-         'carlogos':Carlogos.objects.all(),
-        }
+        
         return JsonResponse({
             'success':True,
-            'html':render(request, 'addproduct.html', ctx).content.decode('utf-8')
         })
     except Exception as e:
         print(e)
@@ -347,45 +316,37 @@ def viewoneproduct(request, id):
     return render(request, 'viewoneproduct.html', ctx)
 
 def updateproduct(request):
-    image=request.FILES.get('image') or None
-    productid=request.POST.get('productid')
-    new=request.POST.get('switch')
-    logo=request.POST.get('updatepdctlogo', None)
-    selected_reps = request.POST.getlist('updatereps')
-    print('>>>>>>>>>>>>>>>',selected_reps)
-    remise=request.POST.get('remise')
-    sellprice=request.POST.get('sellprice')
-    netprice=round(float(sellprice)-(float(sellprice)*float(remise)/100), 2)
+    productid=request.GET.get('productid')
+    new=request.GET.get('new')
+    logo=request.GET.get('logo', None)
+    remise=request.GET.get('remise')
+    sellprice=request.GET.get('sellprice')
+    netprice=request.GET.get('netprice')
     product=Produit.objects.get(pk=productid)
+    print('>>>>>>> code:', request.GET.get('code'), product.ref)
     product.carlogos_id=logo
-    if new=='on':
-      product.isnew=True
-    else:
-      product.isnew=False
-    product.repsprice=json.dumps(selected_reps)
-    product.equivalent=request.POST.get('equivalent')
-    product.code=request.POST.get('updatecode')
-    product.refeq1=request.POST.get('refeq1')
-    product.refeq2=request.POST.get('refeq2')
-    product.refeq3=request.POST.get('refeq3')
-    product.refeq4=request.POST.get('refeq4')
-    product.coderef=request.POST.get('updatecoderef')
-    product.representprice=request.POST.get('updaterepprice') or 0
-    product.representremise=request.POST.get('updaterepremise') or 0
+    product.isnew=new
+    product.equivalent=request.GET.get('equivalent')
+    product.image=request.GET.get('image')
+    product.code=request.GET.get('code')
+    product.refeq1=request.GET.get('refeq1')
+    product.refeq2=request.GET.get('refeq2')
+    product.refeq3=request.GET.get('refeq3')
+    product.refeq4=request.GET.get('refeq4')
+    product.coderef=request.GET.get('coderef')
+    product.stocktotal=request.GET.get('stock', 0)
     product.sellprice=sellprice
     product.remise=remise
     product.prixnet=netprice
-    product.name=request.POST.get('name')
-    product.cars=json.dumps(request.POST.getlist('cars'))
-    product.ref=request.POST.get('ref').lower().strip()
-    product.category_id=request.POST.get('category')
-    product.mark_id=request.POST.get('marque')
-    product.diametre=request.POST.get('diametre')
-    product.block=request.POST.get('block')
-    if image:
-        product.image=image
+    product.name=request.GET.get('name')
+    product.cars=request.GET.get('cars')
+    product.ref=request.GET.get('ref').lower().strip()
+    product.category_id=request.GET.get('category_id')
+    product.mark_id=request.GET.get('mark_id')
+    product.diametre=request.GET.get('diametre')
+    product.block=request.GET.get('block')
     product.save()
-    print('>>end ',product)
+    
 
     return JsonResponse({
         'success':True
@@ -801,12 +762,12 @@ def commercialspage(request):
     return render(request, 'commerciaux.html', ctx)
 
 def addcommercial(request):
-    repusername=request.POST.get('repusername')
-    reppassword=request.POST.get('reppassword')
-    repname=request.POST.get('repname')
-    repphone=request.POST.get('repphone')
-    repregion=request.POST.get('repregion')
-    repinfo=request.POST.get('repinfo')
+    repusername=request.GET.get('repusername')
+    reppassword=request.GET.get('reppassword')
+    repname=request.GET.get('repname')
+    repphone=request.GET.get('repphone')
+    repregion=request.GET.get('repregion')
+    repinfo=request.GET.get('repinfo')
     user=User.objects.create_user(username=repusername, password=reppassword)
     # Get or create the group
     group, created = Group.objects.get_or_create(name="salsemen")
@@ -823,14 +784,10 @@ def addcommercial(request):
         region=repregion,
         info=repinfo
     )
-    ctx={
-        'commercials':Represent.objects.all(),
-        'title':'List des Commeciaux'
-    }
+    
     return JsonResponse({
-        'html':render(request, 'commerciaux.html', ctx).content.decode('utf-8')
+        'success':True
     })
-
 def checkcodeclient(request):
     code=request.POST.get('code')
     name=request.POST.get('name')
@@ -847,14 +804,15 @@ def checkcodeclient(request):
 
 
 def addclient(request):
-    name=request.POST.get('clientnameinp')
-    phone=request.POST.get('clientphone')
-    address=request.POST.get('clientaddress')
-    code=request.POST.get('clientcode')
-    city=request.POST.get('clientcity')
-    ice=request.POST.get('clientice')
-    region=request.POST.get('clientregion').lower().strip()
-    representant=request.POST.get('clientrep')
+    name=request.GET.get('name')
+    phone=request.GET.get('phone')
+    address=request.GET.get('address')
+    code=request.GET.get('code')
+    city=request.GET.get('city')
+    ice=request.GET.get('ice')
+    region=request.GET.get('region').lower().strip()
+    representant=request.GET.get('represent_id')
+    print('>>>>>> adding clients')
     # username=request.POST.get('clientusername')
     # password=request.POST.get('clientpassword')
     # user=User.objects.create_user(username=username, password=password)
@@ -867,9 +825,6 @@ def addclient(request):
         name=name,
         phone=phone,
         address=address,
-        soldtotal=0.00,
-        soldfacture=0.00,
-        soldbl=0.00
     )
     # group, created = Group.objects.get_or_create(name="clients")
     # user.groups.add(group)
@@ -904,17 +859,18 @@ def getclientdata(request):
 
 
 def updateclient(request):
-    id=request.POST.get('updateclientid')
-    client=Client.objects.get(pk=id)
-    client.name=request.POST.get('updateclientname')
-    client.phone=request.POST.get('updateclientphone')
-    client.address=request.POST.get('updateclientaddress')
-    client.ice=request.POST.get('updateclientice')
-    client.code=request.POST.get('updateclientcode')
-    client.city=request.POST.get('updateclientcity')
-    client.address=request.POST.get('updateclientaddress')
-    client.region=request.POST.get('updateclientregion').lower().strip()
-    client.represent_id=request.POST.get('updateclientrep')
+    print('>>>> updating client')
+    clientcode=request.GET.get('clientcode')
+    client=Client.objects.get(code=clientcode)
+    client.name=request.GET.get('name')
+    client.phone=request.GET.get('phone')
+    client.address=request.GET.get('address')
+    client.ice=request.GET.get('ice')
+    client.code=request.GET.get('code')
+    client.city=request.GET.get('city')
+    client.address=request.GET.get('address')
+    client.region=request.GET.get('region').lower().strip()
+    client.represent_id=request.GET.get('rep')
     client.save()
 
     return JsonResponse({
@@ -1268,46 +1224,21 @@ def listfactures(request):
 
 
 def activerproduct(request):
-    id=request.POST.get('id')
-    product=Produit.objects.get(pk=id)
+    id=request.GET.get('id')
     product=Produit.objects.get(pk=id)
     product.isactive=True
     product.save()
-    product=Produit.objects.get(pk=id)
-    print(product.isactive)
-    ctx={
-        'title':'Detail de '+product.ref,
-        'product':product,
-        'cars':product.getcars(),
-        'categories':Category.objects.all(),
-        'marques':Mark.objects.all(),
-        'suppliers':Supplier.objects.all(),
-        'entries':Stockin.objects.filter(product=product),
-        'sorties':Orderitem.objects.filter(product=product),
-    }
     return JsonResponse({
-        'html':render(request, 'viewoneproduct.html', ctx).content.decode('utf-8')
+        'success':True
     })
 
 def desactiverproduct(request):
-    id=request.POST.get('id')
+    id=request.GET.get('id')
     product=Produit.objects.get(pk=id)
     product.isactive=False
     product.save()
-    product=Produit.objects.get(pk=id)
-    print(product.isactive)
-    ctx={
-        'title':'Detail de '+product.ref,
-        'product':product,
-        'cars':product.getcars(),
-        'categories':Category.objects.all(),
-        'marques':Mark.objects.all(),
-        'suppliers':Supplier.objects.all(),
-        'entries':Stockin.objects.filter(product=product),
-        'sorties':Orderitem.objects.filter(product=product),
-    }
     return JsonResponse({
-        'html':render(request, 'viewoneproduct.html', ctx).content.decode('utf-8')
+        'success':True
     })
 
 def generatefacture(request, id):
@@ -3471,11 +3402,13 @@ def genererbonlivraison(request, id):
 
 
 def createclientaccount(request):
-    clientid=request.POST.get('clientid')
-    client= Client.objects.get(pk=clientid)
-    username=request.POST.get('username')
-    password=request.POST.get('password')
+    print('>>>>>>')
+    clientcode=request.GET.get('clientcode')
+    client= Client.objects.get(code=clientcode)
+    username=request.GET.get('username')
+    password=request.GET.get('password')
     #check for username
+    print('>>>>>>', clientcode, username, password)
     user=User.objects.filter(username=username).first()
     if user:
         return JsonResponse({
@@ -3840,8 +3773,8 @@ def excelpdcts(request):
 
 
 def deactivateaccount(request):
-    userid=request.GET.get('userid')
-    user=User.objects.get(id=userid)
+    username=request.GET.get('username')
+    user=User.objects.get(username=username)
     user.is_active=False
     user.save()
     # delete user session in django session
@@ -3854,8 +3787,8 @@ def deactivateaccount(request):
     })
 
 def activateaccount(request):
-    userid=request.GET.get('userid')
-    user=User.objects.get(id=userid)
+    username=request.GET.get('username')
+    user=User.objects.get(username=username)
     user.is_active=True
     user.save()
     return JsonResponse({
@@ -4128,8 +4061,26 @@ def listeconnected(request):
         'connected':connected,
         'active':notconnected,
     }
-    return render(request, 'listconnected.html', ctx)
 
+    response= render(request, 'listconnected.html', ctx)
+    response['Access-Control-Allow-Origin'] = 'http://ibraparts.ddns.net'
+    return response
+
+def updatepdctdata(requests):
+    id=requests.GET.get('id')
+    ref=requests.GET.get('ref')
+    stocktotal=requests.GET.get('stocktotal')
+    #cars=requests.GET.get('cars')
+    try:
+        pdct=Produit.objects.get(pk=id)
+        pdct.stocktotal=stocktotal
+        #pdct.cars=cars
+        pdct.save()
+    except:
+        print('not working')
+    return JsonResponse({
+        'success':True
+    })
 
 def promotionspage(request):
     ctx={
@@ -4139,33 +4090,25 @@ def promotionspage(request):
     return render(request, 'promotions.html', ctx)
 
 def createpromotion(request):
-    name=request.POST.get('promotionname')
+    name=request.GET.get('name')
     # get image file
-    image=request.FILES.get('promotionimage')
+    image=request.GET.get('image')
     # create category
     Promotion.objects.create(info=name, image=image)
-    ctx={
-        'promotions':Mark.objects.all(),
-        'title':'List des promotions'
-    }
+    
     return JsonResponse({
-        'html':render(request, 'promotions.html', ctx).content.decode('utf-8')
+        'success':True
     })
 
 def updatepromotion(request):
-    image=request.FILES.get('image') or None
-    id=request.POST.get('id')
+    image=request.GET.get('image')
+    id=request.GET.get('id')
     promotion=Promotion.objects.get(pk=id)
-    promotion.info=request.POST.get('name')
-    if image:
-        promotion.image=image
+    promotion.info=request.GET.get('name')
+    promotion.image=image
     promotion.save()
-    ctx={
-        'promotions':Mark.objects.all(),
-        'title':'List des promotions'
-    }
     return JsonResponse({
-        'html':render(request, 'promotions.html', ctx).content.decode('utf-8')
+        'success':True
     })
 
 
@@ -5314,13 +5257,45 @@ def searchforlistfc(request):
 
     })
 
+
+def createnewclientaccount(request):
+    clientcode=request.GET.get('clientcode')
+    client= Client.objects.get(code=clientcode)
+    olduser=client.user
+    username=request.GET.get('username')
+    password=request.GET.get('password')
+    print('>>>>>>>>>', clientcode)
+    #check for username
+    
+
+    # create user
+    user=User.objects.create_user(username=username, password=password)
+    # assign user to client
+    group, created = Group.objects.get_or_create(name="clients")
+    user.groups.add(group)
+    user.save()
+    client.user=user
+    client.save()
+    cart=Cart.objects.filter(user=olduser).first()
+    wich=Wich.objects.filter(user=olduser).first()
+    if cart:
+        cart.user=user
+        cart.save()
+    if wich:
+        wich.user=user
+        wich.save()
+    olduser.delete()
+    return JsonResponse({
+        'success':True
+    })
+
 def createnewrepaccount(request):
-    repid=request.POST.get('repid')
+    repid=request.GET.get('repid')
     rep= Represent.objects.get(pk=repid)
     olduser=rep.user
-    olduser.delete()
-    username=request.POST.get('username')
-    password=request.POST.get('password')
+    
+    username=request.GET.get('username')
+    password=request.GET.get('password')
     user=User.objects.filter(username=username).first()
     if user:
         return JsonResponse({
@@ -5334,37 +5309,20 @@ def createnewrepaccount(request):
     user.save()
     rep.user=user
     rep.save()
-    return JsonResponse({
-        'success':True
-    })
-
-
-def createnewclientaccount(request):
-    clientid=request.POST.get('clientid')
-    client= Client.objects.get(pk=clientid)
-    olduser=client.user
+    cart=Cart.objects.filter(user=olduser).first()
+    wich=Wich.objects.filter(user=olduser).first()
+    if cart:
+        cart.user=user
+        cart.save()
+    if wich:
+        wich.user=user
+        wich.save()
     olduser.delete()
-    username=request.POST.get('username')
-    password=request.POST.get('password')
-    #check for username
-    user=User.objects.filter(username=username).first()
-    if user:
-        return JsonResponse({
-            'success':False,
-            'error':'Username exist déja'
-        })
-
-    # create user
-    user=User.objects.create_user(username=username, password=password)
-    # assign user to client
-    group, created = Group.objects.get_or_create(name="clients")
-    user.groups.add(group)
-    user.save()
-    client.user=user
-    client.save()
     return JsonResponse({
         'success':True
     })
+
+
 
 
 def yeardatabl(request):
@@ -6721,4 +6679,38 @@ def excelnotav(request):
     return JsonResponse({
         'success':True
     })
+# this to send carts to local server
+def getcarts(request):
+    carts=Cart.objects.all().order_by('-total').exclude(total=0)
+    data=[]
+    for i in carts:
+        data.append([i.user.id, i.user.username, i.total])
+    return JsonResponse({
+        'carts':data
+    })
 
+def getwishs(request):
+    carts=Wich.objects.all().exclude(total=0)
+    data=[]
+    for i in carts:
+        data.append([i.user.id, i.user.username, i.total])
+    return JsonResponse({
+        'carts':data
+    })
+
+def addnotification(request):
+    notification=request.GET.get('notification')
+    Notification.objects.create(notification=notification)
+    return JsonResponse({
+        'success':True
+        })
+
+def updatenotification(request):
+    notificationid=request.GET.get('notificationid')
+    notification=request.GET.get('notification')
+    notif=Notification.objects.get(pk=notificationid)
+    notif.notification=notification
+    notif.save()
+    return JsonResponse({
+        'success':True
+    })

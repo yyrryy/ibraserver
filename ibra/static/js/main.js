@@ -1093,10 +1093,14 @@
 
         input.on('focus', function() {
             suggestions.addClass('search__dropdown--open');
+            $('body').css('overflow', 'hidden')
+            $('.site__body').css('filter', 'blur(5px)')
         });
         // button click
         searchdropdownremover.on('click', function() {
             suggestions.removeClass('search__dropdown--open');
+            $('body').css('overflow', 'auto')
+            $('.site__body').css('filter', 'none')
         });
 
         vehiclePickerButton.on('click', function() {

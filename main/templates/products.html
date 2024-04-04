@@ -105,22 +105,144 @@
         <!-- title holder -->
         {% if user.groups.all.0.name == 'salsemen'%}
         <button class="btn btn-info bi bi-info position-fixed" style="left: 11px; bottom: 3em; z-index: 9999; width: 2em;" data-toggle="modal" data-target="#ordernote" onclick="getnotefromlocalst()"></button>
-          {% include 'salsemenproducts.html' %}
+        {% include 'salsemenproducts.html' %}
         {% else %}
         <div class="products-view__list products-list products-list--grid--4 position-relative container" data-layout="list" data-with-features="false" style="height: 81vh; overflow-y: scroll;" >
         <div class="products-list__content p-2 m-0">
           
           <div class="row">
           <!-- <div class="bg-dark rounded text-white">{{target}}</div> -->
+          {% if arrivage %}
+          {% for i in products %}
+          <div class="col-6 mb-2">
+          <div class="bg-white shadow p-2" style="height: 17.5em;">
+            
+            <div class="d-flex justify-content-between">
+              <div class="" style="width:170px;">
+                {% if i.image %}
+                <img src="{%if i.image%}{{i.image.url}}{% endif %}" alt="" style="max-width: 275px;max-height: 176px;">
+                {% endif %}
+              </div>
+              <div class="">
+                <div class="mb-2 d-flex">
+                  <strong class="bg-darkblue p-2 text-white">
+                    {{i.ref.upper}}
+                  </strong>
+                  <div class="ms-3">
+                    {% if i.stocktotal %}
+                      {% if i.stocktotal <= 0 %}
+                      <div style="width:20px; height:20px; border-radius:50%; background:red;" ></div>
+                      {% elif i.stocktotal <= 5 %}
+                      <div style="width:20px; height:20px; border-radius:50%; background:orange;" ></div>
+                      {% else %}
+                          <div style="width:20px; height:20px; border-radius:50%; background:green;" >
+                          </div>
+                      {% endif %}
+                    {% else %}
+                      <div style="width:20px; height:20px; border-radius:50%; background:red;" >
+                      </div>
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="text-orange">
+                  <strong>
+                    {% if i.refeq1 %}
+                    {{i.refeq1}}
+                    {% endif %}
+                  </strong><br>
+                  <strong>
+                    {% if i.refeq2 %}
+                    {{i.refeq2}}
+                    {%endif%}
+                  </strong>
+                </div>
+                
+                
+                  
+                <div style="color: #28a8ff;
+                margin-top: 6px;
+                font-size: 20px;">
+                  {% if i.diametre %}
+                  {{i.diametre}}
+                  {% endif %}
+                </div>
+                <div class="mt-3">
+                <strong style="padding: 5px; color: red; margin-top: 7px;">
+                  {{i.refeq4}}
+                </strong>
+                </div>
+              </div>
+              <div><!--price and cmnd-->
+                <div style="margin-right: 20px;">
+                  {% if i.remise != 0 %}
+                        <div style="font-size: 12px;">
+                          <strong class="text-danger">
+                            {{i.sellprice|floatformat:2}} 
+                          </strong>
+                          <span class="text-danger" style="font-size: 12px;">({{i.remise}}%)</span>
+                        </div>
+                        {% else %}
+                        <div style="font-size: 12px;">
+                          <strong class="text-danger">
+                            {{i.sellprice|floatformat:2}} 
+                          </strong>
+                          <span class="text-danger" style="font-size: 12px;">(NET)</span>
+                        </div>
+                        {% endif %}
+                </div>
+                <div class="d-flex flex-column">
+                  {% if i.sellprice > 0 %}
+                  <div>
+                  <div class="cart-table__quantity input-number" style="width: 8vw;"><input style="height: 2.5em;" class="form-control input-number__input qty" type="number" min="1" value="1"><div class="input-number__add"></div><div class="input-number__sub"></div></div>
+                </div>
+                {%if i.stocktotal <= 0%}
+                <button class="btn btn-success w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{%if i.image%} {{i.image.url}}  {%endif%}" pdctremise="{{i.remise}}" pdctcategory="{{i.category.title}}" onclick="whishlist(event)">Reliquat</button>
+                {%else%}
+                <button class="btn btn-primary cmnd w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{% if i.image %} {{i.image.url}} {% endif %}" pdctremise="{{i.remise|floatformat:-2}}" pdctcategory="{{i.category.title}}">Cmnd</button>
+                {%endif%}
+
+                <button class="btn btn-info mt-2 d-none anullercmnd" data-id="{{i.id}}" onclick="anullercmnd(event, '{{i.id}}')">
+                  Anuller
+                </button>
+                {%endif%}
+                </div>
+                {% if i.isnew %}
+              
+                <div id="blinking-text" class="blink mt-3">
+                  <img src="/media/new.jpg" width="40" style="width: 40px;">
+                </div>
+                {% endif %}
+              </div><!--price and cmnd-->
+            </div> <!--photo and equiv-->
+            <div class="row">
+              <div class="col-10" style="height: 6em; overflow-y: scroll;">
+                {% for a in i.getcars %}
+                {{a}} <br>
+                {% endfor %}
+              </div>
+              <div class="col-2">
+                {% if i.mark.image %}
+                <img src="{{i.mark.image.url}}" class="mb-3" width="70" style="width:70px;">
+                {% endif %}
+                {% if i.carlogos.image %}
+                <img src="{{i.carlogos.image.url}}" width="40" style="width:40px;">
+                {% endif %}
+              </div>
+            </div> <!--design and mark auto-->
+            
+          </div> <!--holder-->
+          </div>
+
+          {% endfor %}
+          {%else%}
           {% if category.affichage == 'full' %}
           {% for i in products %}
           <div class="col-12 mb-2">
             <div class="border rounded product-card">
               <div class="product-card__image" style="width: 35em;">
                 <div class="image image--type--product" style="height: 311px;width: 26em;">
-                  {% if i.image %}
-                  <img  src="{{i.image.url}}" alt="{{ i.name }}" loading="lazy" data-toggle="modal" data-target="#imagedisplaymodal" class="imagedisplaybtn">
-                  {% endif %}
+                  <img  src="{% if product.image %}{{product.image.url}}{% else %}/media/default.png{% endif %}" alt="{{ i.name }}" loading="lazy" data-toggle="modal" data-target="#imagedisplaymodal" class="imagedisplaybtn">
+                  
                   
                 </div>
                 
@@ -137,14 +259,20 @@
                       </strong>
                       <div>
                         <strong>
+                          {% if i.refeq1 %}
                           {{i.refeq1}}
+                          {% endif %}
                         </strong> <br>
                         <strong>
+                          {% if i.refeq2 %}
                           {{i.refeq2}}
+                          {%endif%}
                         </strong>
                          <br>
                         <strong>
+                          {% if i.refeq3 %}
                           {{i.refeq3}}
+                          {% endif %}
                         </strong>
                       </div>
                       {% if i.stocktotal %}
@@ -169,7 +297,9 @@
                       </div>
                       {% endif %}
                       <div style="color:#00538c;">
+                        {% if i.diametre %}
                         {{i.diametre}}
+                        {% endif %}
                       </div>
                       
                     </div>
@@ -210,8 +340,13 @@
 
                 </div>
                 <div class="cart-table__quantity input-number mb-3"><input class="form-control input-number__input qty" type="number" min="1" value="1"><div class="input-number__add"></div><div class="input-number__sub"></div></div>
+            <!-- cmd button -->
+            
+            {%if i.stocktotal <= 0%}
+            <button class="btn btn-success w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{%if i.image%} {{i.image.url}}  {%endif%}" pdctremise="{{i.remise}}" pdctcategory="{{i.category.title}}" onclick="whishlist(event)">Reliquat</button>
+            {%else%}
             <button class="btn btn-primary cmnd w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{% if i.image %} {{i.image.url}} {% endif %}" pdctremise="{{i.remise|floatformat:-2}}" pdctcategory="{{i.category.title}}">Cmnd</button>
-
+            {%endif%}
             <button class="btn btn-info mt-2 d-none anullercmnd w-100" data-id="{{i.id}}" onclick="anullercmnd(event, '{{i.id}}')">
               Anuller
             </button>
@@ -233,7 +368,7 @@
           {% endfor %}
           
           <!-- end full affichage -->
-          {% else %}
+          {% elif category.affichage == 'double' %}
           {% for i in products %}
           <div class="col-6 mb-2">
           <div class="bg-white shadow p-2" style="height: 17.5em;">
@@ -247,7 +382,7 @@
               <div class="">
                 <div class="mb-2 d-flex">
                   <strong class="bg-darkblue p-2 text-white">
-                    {{i.ref}}
+                    {{i.ref.upper}}
                   </strong>
                   <div class="ms-3">
                     {% if i.stocktotal %}
@@ -267,10 +402,14 @@
                 </div>
                 <div class="text-orange">
                   <strong>
+                    {% if i.refeq1 %}
                     {{i.refeq1}}
+                    {% endif %}
                   </strong><br>
                   <strong>
+                    {% if i.refeq2 %}
                     {{i.refeq2}}
+                    {%endif%}
                   </strong>
                 </div>
                 
@@ -279,7 +418,9 @@
                 <div style="color: #28a8ff;
                 margin-top: 6px;
                 font-size: 20px;">
+                  {% if i.diametre %}
                   {{i.diametre}}
+                  {% endif %}
                 </div>
                 <div class="mt-3">
                 <strong style="padding: 5px; color: red; margin-top: 7px;">
@@ -309,7 +450,11 @@
                   <div>
                   <div class="cart-table__quantity input-number" style="width: 8vw;"><input style="height: 2.5em;" class="form-control input-number__input qty" type="number" min="1" value="1"><div class="input-number__add"></div><div class="input-number__sub"></div></div>
                 </div>
-                <button class="btn btn-primary cmnd" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{% if i.image %} {{i.image.url}} {% endif %}" pdctremise="{{i.remise|floatformat:-2}}" pdctcategory="{{i.category.title}}">Cmnd</button>
+                {%if i.stocktotal <= 0%}
+                <button class="btn btn-success w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{%if i.image%} {{i.image.url}}  {%endif%}" pdctremise="{{i.remise}}" pdctcategory="{{i.category.title}}" onclick="whishlist(event)">Reliquat</button>
+                {%else%}
+                <button class="btn btn-primary cmnd w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{% if i.image %} {{i.image.url}} {% endif %}" pdctremise="{{i.remise|floatformat:-2}}" pdctcategory="{{i.category.title}}">Cmnd</button>
+                {%endif%}
 
                 <button class="btn btn-info mt-2 d-none anullercmnd" data-id="{{i.id}}" onclick="anullercmnd(event, '{{i.id}}')">
                   Anuller
@@ -343,6 +488,113 @@
           </div>
 
           {% endfor %}
+          {% else %}
+          <div class="products-view__list products-list products-list--grid--4" data-layout="table" data-with-features="false">
+            <div class="products-list__head">
+              <div class="products-list__column products-list__column--image">Image</div>
+              <div class="products-list__column products-list__column--meta">SKU</div>
+              <div class="products-list__column products-list__column--product">Product</div>
+              <div class="products-list__column products-list__column--rating">Rating</div>
+              <div class="products-list__column products-list__column--price">Price</div>
+            </div>
+            <div class="products-list__content">
+                    {% for i in products %} <!-- loop table products -->
+                    
+                      <div class="products-list__item">
+                        <div class="product-card">
+                          <div class="product-card__actions-list">
+                            <button class="product-card__action product-card__action--quickview" type="button" aria-label="Quick view">
+                              <svg width="16" height="16">
+                                <path d="M14,15h-4v-2h3v-3h2v4C15,14.6,14.6,15,14,15z M13,3h-3V1h4c0.6,0,1,0.4,1,1v4h-2V3z M6,3H3v3H1V2c0-0.6,0.4-1,1-1h4V3z
+                     M3,13h3v2H2c-0.6,0-1-0.4-1-1v-4h2V13z"></path>
+                              </svg>
+                            </button>
+                            <button class="product-card__action product-card__action--wishlist" type="button" aria-label="Add to wish list">
+                              <svg width="16" height="16">
+                                <path d="M13.9,8.4l-5.4,5.4c-0.3,0.3-0.7,0.3-1,0L2.1,8.4c-1.5-1.5-1.5-3.8,0-5.3C2.8,2.4,3.8,2,4.8,2s1.9,0.4,2.6,1.1L8,3.7
+                    l0.6-0.6C9.3,2.4,10.3,2,11.3,2c1,0,1.9,0.4,2.6,1.1C15.4,4.6,15.4,6.9,13.9,8.4z"></path>
+                              </svg>
+                            </button>
+                            <button class="product-card__action product-card__action--compare" type="button" aria-label="Add to compare">
+                              <svg width="16" height="16">
+                                <path d="M9,15H7c-0.6,0-1-0.4-1-1V2c0-0.6,0.4-1,1-1h2c0.6,0,1,0.4,1,1v12C10,14.6,9.6,15,9,15z"></path>
+                                <path d="M1,9h2c0.6,0,1,0.4,1,1v4c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1v-4C0,9.4,0.4,9,1,9z"></path>
+                                <path d="M15,5h-2c-0.6,0-1,0.4-1,1v8c0,0.6,0.4,1,1,1h2c0.6,0,1-0.4,1-1V6C16,5.4,15.6,5,15,5z"></path>
+                              </svg>
+                            </button>
+                          </div>
+                          <div class="product-card__image">
+                            <div class="image image--type--product">
+                              <a href='' class="image__body"><img class="image__tag" src="{% if i.image %}{{i.image.url}}{%else%}/media/default.png{%endif%}" alt=""></a>
+                            </div>
+                            <div class="status-badge status-badge--style--success product-card__fit status-badge--has-icon status-badge--has-text">
+                              <div class="status-badge__body">
+                                <div class="status-badge__icon">
+                                  <svg width="13" height="13">
+                                    <path d="M12,4.4L5.5,11L1,6.5l1.4-1.4l3.1,3.1L10.6,3L12,4.4z"></path>
+                                  </svg>
+                                </div>
+                                <div class="status-badge__text">
+                                    <strong class="badge">
+                                      {{i.ref.upper}}
+                                    </strong>{{i.name}}</div>
+                                <div class="status-badge__tooltip" tabindex="0" data-toggle="tooltip" title="" data-original-title="Part Fit for 2011 Ford Focus S"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="product-card__info">
+                           
+                            <div class="product-card__name">
+                              <div>
+                                <div class="product-card__badges">
+                                  {% if i.new %}
+                                  <div class="tag-badge tag-badge--new">new</div>
+                                  {% endif %}
+                                </div>
+                                <a href=''><strong class="p-2 bg-darkblue me-3 rounded text-white">
+                                      {{i.ref.upper}}
+                                    </strong>{{i.name}}</a>
+                              </div>
+                            </div>
+                            
+                            <div class="product-card__rating">
+                              {% if i.stocktotal %}
+                                        {% if i.stocktotal <= 0 %}
+                                        <div style="width:20px; height:20px; border-radius:50%; background:red;" ></div>
+                                        {% elif i.stocktotal <= 5 %}
+                                        <div style="width:20px; height:20px; border-radius:50%; background:orange;" ></div>
+                                        {% else %}
+                                            <div style="width:20px; height:20px; border-radius:50%; background:green;" >
+                                            </div>
+                                        {% endif %}
+                                      {% else %}
+                                        <div style="width:20px; height:20px; border-radius:50%; background:red;" >
+                                        </div>
+                                      {% endif %}
+                            </div>
+                            
+                          </div>
+                          <div class="product-card__footer">
+                            <div class="product-card__prices">
+                              <div class="product-card__price product-card__price--current">{{i.sellprice}} ({%if i.remise > 0%}{{i.remise}}{%else%}Net{%endif%})</div>
+                            </div>
+                            <div class="cart-table__quantity input-number mb-3"><input class="form-control input-number__input qty" type="number" min="1" value="1"><div class="input-number__add"></div><div class="input-number__sub"></div></div>
+          
+                            {% if i.stocktotal <= 0 %}
+                            <button class="btn btn-success w-100" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{% if i.image %} {{i.image.url}} {% endif %}" pdctremise="{{i.remise|floatformat:-2}}" pdctcategory="{{i.category.title}}" onclick="whishlist(event)">Reliquat</button>
+                              {% else %}
+                              <button class="btn btn-primary w-100 cmnd" pdct="{{i.id}}" pdctref="{{i.ref}}" pdctname="{{i.name}}" pdctpr="{{i.sellprice}}" pdctid="{{i.id}}" pdctimg="{% if i.image %} {{i.image.url}} {% endif %}" pdctremise="{{i.remise|floatformat:-2}}" pdctcategory="{{i.category.title}}">Cmnd</button>
+                              {% endif %}
+                            <button class="btn btn-info mt-2 d-none anullercmnd" data-id="{{i.id}}" onclick="anullercmnd(event, '{{i.id}}')">
+                                Anuller
+                              </button>
+                          </div>
+                        </div>
+                      </div>
+           
+                    {% endfor %} <!-- endloop table products -->
+            </div>
+          </div>
           {% endif %}
           <div class="d-flex justify-content-between">
             
@@ -354,8 +606,8 @@
             </a>
           </div>
       </div>
-        {% endif %}
-        
+        {% endif%}
+        {% endif%}
         </div>
       </div>
     </div>

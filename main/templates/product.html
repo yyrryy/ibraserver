@@ -25,9 +25,9 @@
                   </button> -->
                   <a class="image image--type--product" data-width="700" data-height="700">
                     <div class="image__body">
-                      {% if product.image %}
-                      <img class="image__tag" src="{{product.image.url}}" alt="{{ i.name }}" loading="lazy">
-                      {% endif %}
+                      
+                      <img  src="{% if product.image %}{{product.image.url}}{% else %}/media/default.png{% endif %}" alt="{{ i.name }}" loading="lazy" data-toggle="modal" data-target="#imagedisplaymodal" class="imagedisplaybtn">
+                      
                     </div></a>
                 </div>
                 
@@ -48,6 +48,10 @@
                     <br>
                     <strong style="color: blue">
                       Diametre: {{product.diametre}}
+                    </strong>
+                    <br>
+                    <strong>
+                      {{product.name}}
                     </strong>
                   </div>
                   

@@ -21,6 +21,18 @@
     <link href="{% static 'css/minified.css'%}" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/datepicker.css">
     <style>
+      .rise-shake {
+        animation: jump-shaking 0.83s infinite;
+      }
+      @keyframes jump-shaking {
+        0% { transform: translateX(0) }
+        25% { transform: translateY(-9px) }
+        35% { transform: translateY(-9px) rotate(17deg) }
+        55% { transform: translateY(-9px) rotate(-17deg) }
+        65% { transform: translateY(-9px) rotate(17deg) }
+        75% { transform: translateY(-9px) rotate(-17deg) }
+        100% { transform: translateY(0) rotate(0) }
+      }
         .float{
     position:fixed;
     width:60px;
@@ -528,7 +540,27 @@
     <!-- site -->
     <!-- <a id="button"></a> -->
     <div class="site">
+        <div class="d-none passwordcatalogholder" style="
+            position: absolute;
+            width: 100%;
+            z-index: 999;
+            padding: 15px;
+            height: 100vh;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            background: #000000a6;
+            ">
+            <div class="col-6 m-auto" style=" 0 auto 0 auto;">
+                <input class="form-control passwordcatalog" placeholder="mot de passe">
+                <div class="d-flex justify-content-between">
+                        
+                    <button class="btn btn-success bi bi-check" onclick="catalogpermission()"></button>
+                    <button class="btn btn-primary bi bi-times" onclick="$('.passwordcatalogholder').addClass('d-none')"></button>
+                </div>
+            </div>
 
+        </div>
         {% if user.username %}
 
         {% if user.groups.all.0.name == 'clients' %}
@@ -558,7 +590,7 @@
         </div>
         </div>
         
-        <div class="site__body mt-5">
+        <div class="site__body">
             <div>
                 
                 <div class="">
@@ -570,6 +602,9 @@
                       </div>
                       {% endfor %}
                   </div>
+                  {% endif %}
+                  {% if user.groups.all.0.name == 'salsemen' %}
+                  <!-- <button class="btn displayrepheader" onclick="$('.repheader').css('top', '0px')">X</button> -->
                   {% endif %}
                   {% block content %}
                   {% endblock %}
@@ -713,14 +748,15 @@
                 {% endif %}
                 <ul class="account-menu__links">
                     <li>
-                        <a href="/client/clientshome">Acueill</a>
                     </li>
                     <li>
                       {% if user.groups.all.0.name == 'clients' %}
+                      <a href="/client/clientshome">Acueill</a>
                       <a href="{% url 'main:clientdashboar' %}">Compte</a>
                       {% elif user.groups.all.0.name == 'salsemen' %}
-                      <a href="{% url 'main:ordersforeach' %}">Commandes</a>
-                      <div class="card-body border mt-3">
+                      <a href="/catalogpage" target="_blank">Acueill</a>
+                      <a href="{% url 'main:ordersforeach' %}" target="blank">Commandes</a>
+                      <!-- <div class="card-body border mt-3">
                         
                         <h5 class="bg-darkblue p-2 text-white">
                             Ajouter nouveau client
@@ -733,7 +769,9 @@
                         <button class="btn w-100 createclient bg-darkblue text-white">
                           Creer
                         </button>
-                    </div>
+                      </div> -->
+                      <!-- <a class="mt-5" href="/logoutuser">Deconnecter</a> -->
+
                       {% endif %}
                     </li>
                     <!-- <li>
@@ -822,6 +860,34 @@
     <script src="/static/js/moment.js"></script>
     <script src="/static/js/datepicker.js"></script>
     <script>
+      
+
+      function filtersearch(event){
+        var $el = $('.productsbrand' + $(event.target).attr('id')).fadeIn(450);
+        $('.searchresults > div').not($el).hide();
+        //$btns.removeClass('active');
+        //$(this).addClass('active');
+      }
+      function filtercategories(event){
+        console.log($('.productscategory' + $(event.target).attr('id')))
+        var $el = $('.productscategory' + $(event.target).attr('id')).fadeIn(450);
+        $('.searchresults > div').not($el).hide();
+        //$btns.removeClass('active');
+        //$(this).addClass('active');
+      }
+
+
+        function catalogpermission(){
+        $.get('/catalogpermission', {
+          'password':$('.passwordcatalog').val()
+        },(data)=>{
+          if (data.success){
+            location.href=data.url
+          }else{
+            alertify.error(data.error)
+          }
+        })
+      }
         function anullercmnd(event, productid){
             alertify.confirm('Anuller ?', function(){
                 $.get('/removeitemfromcart', {'productid':id}, (data)=>{
@@ -836,6 +902,22 @@
         $.get('/getitemsincart', {'userid': "{{request.user.id}}"}, (data)=>{
             console.log(data)
             $('.commanditems').text(data.length)
+        })
+        $.get('/getitemsinwishlist', {'userid': "{{request.user.id}}"}, (data)=>{
+            console.log(data)
+            $('.whishedlist').text(data.length)
+        })
+        $.get('/switchtocart', (data)=>{
+            console.log(data)
+        })
+
+        $.get('/notifications', (data)=>{
+          console.log(data)
+          if(data.length>0){
+            $('.notificationicon').addClass('rise-shake')
+            $('.notificationcount').text(data.length)
+          }
+          
         })
         function cmnd(event){
             // id=$(el).attr('pdct');
@@ -866,6 +948,35 @@
             }
             // update total
         }
+        function whishlist(event){
+            // id=$(el).attr('pdct');
+            ref=$(event.target).attr('pdctref')
+            name=$(event.target).attr('pdctname')
+            ctg=$(event.target).attr('pdctcategory')
+            pr=$(event.target).attr('pdctpr')
+            id=$(event.target).attr('pdctid')
+            img=$(event.target).attr('pdctimg')
+            //min is remise
+            min=$(event.target).attr('pdctremise')
+            // get nearest item
+            let qty = $(event.target).parent().find('.input-number > .input-number__input').val()
+            // add new row to coommand table
+            console.log({'productid':id, 'qty':qty})
+            if (qty!=''){
+                $(event.target).attr('disabled', true)
+                //addcmnd(name, ctg, ref, qty, pr, id, img, min)
+                $.get('/addtowhishlist', {'productid':id, 'qty':qty}, (data)=>{
+                if (!data.success){
+                  alertify.error(data.message)
+                }else{
+                  $('.whishedlist').html(parseInt($('.whishedlist').html())+1)
+                }
+            })
+            }
+            // update total
+        }
+
+
         function emptycard(){
             localStorage.removeItem('products')
             localStorage.removeItem('productsdetails')
@@ -1174,13 +1285,30 @@
         event.preventDefault()
         ref=$(event.target).parent().find('.searchphone').val()
         console.log('>>>>', ref)
+        $('.searchresults').html('Chercher ....')
         if (ref!=''){
             loading()
             $.get('/searchrefphone', {'ref': ref.toLowerCase()}, (data)=>{
                 stoploading()
                 if (data){
+
                     $('.searchref').focus()
                     $('.searchresults').html(data.data)
+                      $('.brands').html('')
+                      $('.categoriesfilter').html('')
+                    for (i of data.brands){
+                      $('.brands').append(`
+                        <img class="tag-badge tag-badge--hot" id='${i.id}' onclick="filtersearch(event)" src='${i.image}' style="width:14em;height:4em;">
+                      `)
+                    }
+                    for (i of data.categories){
+                      $('.categoriesfilter').append(`
+                        <div class="tag-badge tag-badge--hot" id='cat${i.id}' onclick="filtercategories(event)" style="font-size:15px; width:13em 7px;">${i.name}</div>
+                      `)
+                    }
+                    $.get('/makeuserconnected', {'activity':'recherche '+ref}, (data)=>{
+                        console.log('ready',data)
+                    })
                 }
             }) 
         }

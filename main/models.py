@@ -220,7 +220,6 @@ class Client(models.Model):
     soldfacture=models.FloatField(default=0.00, null=True, blank=True)
     address=models.CharField(max_length=200)
     phone=models.CharField(max_length=200, default=None, null=True)
-    
     def __str__(self) -> str:
         return self.name+'-'+str(self.city)
 
@@ -584,3 +583,19 @@ class Cartitems(models.Model):
     product=models.ForeignKey(Produit, on_delete=models.CASCADE, default=None)
     qty=models.IntegerField(default=None, null=True, blank=True)
     total=models.FloatField(default=None, null=True, blank=True)
+
+class Wich(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    total=models.FloatField(default=None, null=True, blank=True)
+    def __str__(self) -> str:
+        if self.user:
+            return self.user.username
+#wishlist items
+class Wishlist(models.Model):
+    wich=models.ForeignKey(Wich, on_delete=models.CASCADE, default=None, null=True, blank=True)
+    product=models.ForeignKey(Produit, on_delete=models.CASCADE, default=None)
+    qty=models.IntegerField(default=None, null=True, blank=True)
+    total=models.FloatField(default=None, null=True, blank=True)
+
+class Notification(models.Model):
+    notification=models.TextField()
