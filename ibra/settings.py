@@ -51,6 +51,10 @@ MIDDLEWARE = [
     'main.middleware.RequestLoggingMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://brahimpparts.com",
+    "https://www.brahimpparts.com",
+]
 ROOT_URLCONF = 'ibra.urls'
 
 LOGGING = {
