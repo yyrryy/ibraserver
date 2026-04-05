@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-1l2!2=ok(-_&=@!ayo((a4uestute-%hn21g43m7vb5l&k864k
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-DEBUG = True
+DEBUG = False
 print('>>>>>>>>', DEBUG)
 ALLOWED_HOSTS = ['157.245.74.156', 'ibraparts.ma', 'www.ibraparts.ma', 'localhost']
 
@@ -95,17 +95,26 @@ WSGI_APPLICATION = 'ibra.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'your_database_name',
-        'USER': 'myprojectuser',
-        'PASSWORD': "gadwad123",
-        'HOST': 'localhost',
-        'PORT': '',
+usesqlite = os.getenv('DEBUG')=='True' or os.getenv('HOME')=='/home/aaliali'
+print('usesqlite', usesqlite)
+if usesqlite:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'your_database_name',
+            'USER': 'myprojectuser',
+            'PASSWORD': "gadwad123",
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
 
 CSRF_TRUSTED_ORIGINS=['https://ibraparts.ma', 'http://157.245.74.156']
 # Password validation
