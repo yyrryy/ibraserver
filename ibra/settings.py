@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-1l2!2=ok(-_&=@!ayo((a4uestute-%hn21g43m7vb5l&k864k
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-DEBUG = False
+DEBUG = True
 print('>>>>>>>>', DEBUG)
 ALLOWED_HOSTS = ['157.245.74.156', 'ibraparts.ma', 'www.ibraparts.ma', 'localhost']
 
