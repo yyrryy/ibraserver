@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta content="telephone=no" name="format-detection" />
+    <!-- favicon -->
+    <link href="/static/logos/favicon.jpg" rel="icon" />
+    {% block meta %}
+    {% endblock %}
+    {% if title %}
+    <title>{{title}} - IBRA</title>
+    {% else %}
+    <title>Catalogue</title>
+    {% endif %}
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i" rel="stylesheet" />
+    <!-- css -->
+    <script src="/static/js/jquery.min.js"></script>
+    <link href="/static/css/minified.css" rel="stylesheet" />
+</head>
+<body>
+    <table class="table table-bordered mb-2">
+        <tr>
+            <td>cmd n°</td>
+            <td>date</td>
+            <td>Representant</td>
+            <td>client</td>
+            <td>comd client</td>
+        </tr>
+        <tr>
+            <td>{{order.order_no}}</td>
+            <td>{{order.date|date:'d/m/Y'}}</td>
+            <td>{% if order.salseman %}{{order.salseman.name}}{%endif%}</td>
+            <td>{{order.client.name}}</td>
+            <td>{% if order.isclientcommnd %}YES{%endif%}</td>
+        </tr>
+    </table>
+    <table class="table table-bordered mb-2">
+        <tr>
+            <td>Produit</td>
+            <td>Quantite</td>
+            <td>Prix</td>
+            <td>Total</td>
+        </tr>
+        {%for i in items%}
+        <tr>
+            <td>{{i.product.ref}} {{i.product.name}}</td>
+            <td>{{i.qty}}</td>
+            <td>{{i.price}}</td>
+            <td>{{i.total}}</td>
+        </tr>
+        {%endfor%}
+    </table>
+</body>
+</html>

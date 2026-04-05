@@ -1,0 +1,13 @@
+migrations/
+db.sqlite3
+media_root/
+filetree.py
+__pycache__/
+*.log
+*.txt
+*.sqlie3
+myprojectenv/
+migrations/
+*.sql
+*.json
+*.csv
