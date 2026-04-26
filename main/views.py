@@ -739,12 +739,14 @@ def orderitems(request, id):
         'data':render(request, 'orderitems.html', {'orderitems':orderitems, 'order':order}).content.decode('utf-8')
     })
 
-
+@login_required
 def dilevered(request, id):
     order=Order.objects.get(pk=id)
-    order.isdelivered=True
+    order.senttoserver=False
     order.save()
-    return redirect('main:orders')
+    return JsonResponse({
+        "success":True
+    })
 
 def paied(request, id):
     order=Order.objects.get(pk=id)
@@ -1386,9 +1388,9 @@ def allproducts(request):
         'products':products
     }
     return render(request, 'products.html', ctx)
-
+@login_required
 def ordersnotsent(request):
-    orders=Order.objects.filter(senttoserver=False)
+    orders = Order.objects.order_by('-id')[:30]
     ctx={
         'orders':orders
     }

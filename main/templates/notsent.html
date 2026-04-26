@@ -33,7 +33,7 @@
 				<td>{% if i.isclientcommnd %}{{i.client}}{% else %} {{i.salseman}} {% endif %} {{i.date|date:'d/m/Y'}}</td>
 				<td>{{i.client}}</td>
 				<td>{{i.total}}</td>
-				<td><button class="btn btn-info" onclick="downloadcmd(event, '{{i.id}}')">Telecharger</button></td>
+				<td><button class="btn btn-info" onclick="sendtolocal(event, '{{i.id}}')">Envoyer</button></td>
 			</tr>
 		{% endfor %}
 	</table>
@@ -58,6 +58,15 @@
 					}, 1000); // 1000 milliseconds = 1 seconds
 				}, false);
 				 }
+		}
+		function sendtolocal(event, orderid){
+			let password=$('.password').val()
+			if (password!=''){
+				$.get('/dilevered/'+orderid, {"password":password})
+				$(event.target).addClass('disabled')
+				$(event.target).parent().parent().css('background', 'yellowgreen')
+				//url = window.location.pathname.split( '/' );[0]
+			}
 		}
 			//	$.get('/downloadcmd', {
 			//		'orderid':orderid
