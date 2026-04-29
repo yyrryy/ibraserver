@@ -516,47 +516,48 @@ def commande(request):
         totalofdispounible=0
         totalofnotdispounible=0
         for i in cartitems:
+            total = round(int(i.qty)*i.product.prixnet, 2)
             if request.user.groups.first().name=='clients':
                 if i.product.stocktotal>0:
-                    totalofdispounible+=i.total
+                    totalofdispounible+=total
                     item={
                         'ref':i.product.ref,
                         'name':i.product.name,
                         'qty':i.qty,
                         'price':i.product.sellprice,
-                        'total':i.total,
+                        'total':total,
                         'remise':i.product.remise,
                         'productid':i.product.id,
                     }
                     itemsdisponible.append(item)
                     i.delete()
                 else:
-                    totalofnotdispounible+=i.total
+                    totalofnotdispounible+=total
                 cart.total=totalofnotdispounible
                 cart.save()
                 
             else:
                 if i.product.stocktotal>0:
-                    totalofdispounible+=i.total
+                    totalofdispounible+=total
                     item={
                         'ref':i.product.ref,
                         'name':i.product.name,
                         'qty':i.qty,
                         'price':i.product.sellprice,
-                        'total':i.total,
+                        'total':total,
                         'remise':i.product.remise,
                         'productid':i.product.id,
                     }
                     itemsdisponible.append(item)
                     i.delete()
                 else:
-                    totalofnotdispounible+=i.total
+                    totalofnotdispounible+=total
                     item={
                         'ref':i.product.ref,
                         'name':i.product.name,
                         'qty':i.qty,
                         'price':i.product.sellprice,
-                        'total':i.total,
+                        'total':total,
                         'remise':i.product.remise,
                         'productid':i.product.id,
                     }
