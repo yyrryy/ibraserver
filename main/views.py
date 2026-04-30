@@ -1391,7 +1391,7 @@ def allproducts(request):
     return render(request, 'products.html', ctx)
 @login_required
 def ordersnotsent(request):
-    orders = Order.objects.order_by('-id')
+    orders = Order.objects.order_by('-id')[:200]
     ctx={
         'orders':orders
     }
