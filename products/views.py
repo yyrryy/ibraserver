@@ -6822,6 +6822,7 @@ def updatestockfromthread(request):
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
+        print('>>>>>>>>>>>>Invalid JSON')
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
 
     # data should be something like:
