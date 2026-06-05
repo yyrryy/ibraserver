@@ -6828,9 +6828,12 @@ def updatestockfromthread(request):
     # data should be something like:
     # [[uniqcode, stock], [uniqcode, stock], ...]
     for uniqcode, stock in data:
-        product = Produit.objects.get(uniqcode=uniqcode)
-        product.stocktotal = stock
-        product.save()
+        try:
+            product = Produit.objects.get(uniqcode=uniqcode)
+            product.stocktotal = stock
+            product.save()
+        except Exception as e:
+            print(f'Error updating product with uniqcode {uniqcode}: {e}')
     return JsonResponse({'success': True})
 
 def getcommandnumber(request):
