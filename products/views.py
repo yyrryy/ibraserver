@@ -6830,6 +6830,7 @@ def updatestockfromthread(request):
     for uniqcode, stock in data:
         try:
             product = Produit.objects.get(uniqcode=uniqcode)
+            print(f'Updating product {product.ref} with stock {stock}')
             product.stocktotal = stock
             product.save()
         except Exception as e:
